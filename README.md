@@ -1,6 +1,6 @@
  keras_dogbreed
 
-Codes for EE298F project.
+EE298F project.
 
 Kaggle Challenge. Dogbreed Identification.
 
