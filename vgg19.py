@@ -1,7 +1,7 @@
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import keras
-from keras.applications.vgg16 import VGG16
+from keras.applications.vgg19 import VGG19
 from keras.models import Model
 from keras.layers import Dense, Dropout, Flatten
 from keras.callbacks import Callback, ModelCheckpoint
@@ -25,7 +25,7 @@ num_class = 120
 epochs = 10
 
 def data_gen(batch_size, image_size):
-
+    print(image_size)
     df_train = pd.read_csv('../input/labels.csv')
 
     targets_series = pd.Series(df_train['breed'])
@@ -54,7 +54,7 @@ def data_gen(batch_size, image_size):
 #        print(i)
         yield x_train_raw, y_train_raw
 
-base_model = VGG16(#weights='imagenet',
+base_model = VGG19(#weights='imagenet',
     weights = 'imagenet', include_top=False, input_shape=(im_size, im_size, 3))
 
 # Add a new top layer
@@ -77,11 +77,11 @@ callbacks_list = [keras.callbacks.EarlyStopping(monitor='val_acc', patience=3, v
 model.summary()
 
 
-checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/mbnet-weights-improvement-{:02d}.hdf5"
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/vgg19-weights-improvement-{:02d}.hdf5"
 checkpoint = ModelCheckpoint(checkpointpath, verbose=1)
 
 batch_size = 16
-model.fit_generator(data_gen( batch_size=batch_size, image_size = im_size),
+model.fit_generator(data_gen( batch_size=batch_size, image_size = 90),
                     steps_per_epoch=32,
                     epochs=10, verbose =1)
 

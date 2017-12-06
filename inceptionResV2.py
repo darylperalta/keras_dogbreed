@@ -1,7 +1,7 @@
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import keras
-from keras.applications.vgg16 import VGG16
+from keras.applications.mobilenet import MobileNet
 from keras.models import Model
 from keras.layers import Dense, Dropout, Flatten
 from keras.callbacks import Callback, ModelCheckpoint
@@ -14,7 +14,7 @@ import cv2
 
 
 from random import randint
-im_size =90
+im_size = 224
 
 num_samples = 10222
 
@@ -22,7 +22,7 @@ num_class = 120
 #steps_per_epoch = num_samples//batch_size
 
 #print(steps_per_epoch)
-epochs = 10
+#epochs = 2
 
 def data_gen(batch_size, image_size):
 
@@ -54,7 +54,7 @@ def data_gen(batch_size, image_size):
 #        print(i)
         yield x_train_raw, y_train_raw
 
-base_model = VGG16(#weights='imagenet',
+base_model = MobileNet(#weights='imagenet',
     weights = 'imagenet', include_top=False, input_shape=(im_size, im_size, 3))
 
 # Add a new top layer

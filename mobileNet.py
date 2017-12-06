@@ -14,35 +14,33 @@ import cv2
 
 
 from random import randint
-im_size = 128
-batch_size = 32
-
+im_size = 120
 
 num_samples = 10222
 
 num_class = 120
-steps_per_epoch = num_samples//batch_size
+#steps_per_epoch = num_samples//batch_size
 
-print(steps_per_epoch)
-epochs = 2
+#print(steps_per_epoch)
+#epochs = 2
 
 def data_gen(batch_size, image_size):
-    
+
     df_train = pd.read_csv('../input/labels.csv')
-    
+
     targets_series = pd.Series(df_train['breed'])
     one_hot = pd.get_dummies(targets_series, sparse = True)
     one_hot_labels = np.asarray(one_hot)
 
 
-    
+
     fn = pd.Series(df_train['id'])
 
-    
+
     x_train = []
     y_train = []
-  
-   
+
+
     while True:
         for i in range(batch_size):
             #index = np.random.choice(fn.shape[0],1)
@@ -57,7 +55,7 @@ def data_gen(batch_size, image_size):
         yield x_train_raw, y_train_raw
 
 base_model = MobileNet(#weights='imagenet',
-    weights = 'imagenet', include_top=False, input_shape=(im_size, im_size, 3))
+    weights = None, include_top=False, input_shape=(im_size, im_size, 3))
 
 # Add a new top layer
 x = base_model.output
@@ -71,32 +69,32 @@ model = Model(inputs=base_model.input, outputs=predictions)
 for layer in base_model.layers:
     layer.trainable = False
 
-model.compile(loss='categorical_crossentropy', 
-              optimizer='adam', 
+model.compile(loss='categorical_crossentropy',
+              optimizer='adam',
               metrics=['accuracy'])
 
 callbacks_list = [keras.callbacks.EarlyStopping(monitor='val_acc', patience=3, verbose=1)]
 model.summary()
 
 
-checkpointpath="/home/airscan/Documents/EE298F/dogbreed/mbnet-weights-improvement-{:02d}.hdf5"
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/mbnet-weights-improvement-{:02d}.hdf5"
 checkpoint = ModelCheckpoint(checkpointpath, verbose=1)
 
-batch_size = 32
+batch_size = 16
 model.fit_generator(data_gen( batch_size=batch_size, image_size = im_size),
                     steps_per_epoch=32,
                     epochs=10, verbose =1)
 
 
 x_test = []
-    
+
 
 df_test = pd.read_csv('../input/sample_submission.csv')
 
 for f in tqdm(df_test['id'].values):
     img = cv2.imread('../input/test/{}.jpg'.format(f))
     x_test.append(cv2.resize(img, (im_size, im_size)))
- 
+
 x_test  = np.array(x_test, np.float32) / 255.
 
 preds = model.predict(x_test, verbose=1)

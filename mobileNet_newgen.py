@@ -1,7 +1,9 @@
+#fixing data generator because of OOM error
+
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import keras
-from keras.applications.vgg16 import VGG16
+from keras.applications.mobilenet import MobileNet
 from keras.models import Model
 from keras.layers import Dense, Dropout, Flatten
 from keras.callbacks import Callback, ModelCheckpoint
@@ -14,7 +16,7 @@ import cv2
 
 
 from random import randint
-im_size =90
+im_size =224
 
 num_samples = 10222
 
@@ -24,37 +26,68 @@ num_class = 120
 #print(steps_per_epoch)
 epochs = 10
 
+
+
+
+
+
+
+
 def data_gen(batch_size, image_size):
-
-    df_train = pd.read_csv('../input/labels.csv')
-
-    targets_series = pd.Series(df_train['breed'])
-    one_hot = pd.get_dummies(targets_series, sparse = True)
-    one_hot_labels = np.asarray(one_hot)
-
-
-
-    fn = pd.Series(df_train['id'])
-
-
-    x_train = []
-    y_train = []
-
-
+    #print(image_size)
+    #formatting labels
     while True:
-        for i in range(batch_size):
-            #index = np.random.choice(fn.shape[0],1)
-            index = randint(0,fn.shape[0]-1)
-            img = cv2.imread('../input/train/{}.jpg'.format(fn[index]))
-            x_train.append(cv2.resize(img,(image_size,image_size)))
-            label = one_hot_labels[index]
-            y_train.append(label)
-        y_train_raw = np.array(y_train, np.uint8)
-        x_train_raw = np.array(x_train, np.float32) / 255.
-#        print(i)
-        yield x_train_raw, y_train_raw
+        num_batches = 10222//32
 
-base_model = VGG16(#weights='imagenet',
+        #shuffle data frame
+        #split into batches
+        #perform formatting
+        #load by batch
+        df_train = pd.read_csv('../input/labels.csv')
+        df_train = df_train.reindex(np.random.permutation(df_train.index))
+        df_train = df_train.reset_index(drop=True)
+
+        targets_series = pd.Series(df_train['breed'])
+        one_hot = pd.get_dummies(targets_series, sparse = True) # converts to categorical
+        one_hot_labels = np.asarray(one_hot) #converts to numpy array
+        del one_hot
+        del targets_series
+        fn = pd.Series(df_train['id'])
+
+
+
+        #taking filenames in a list
+
+
+        x_train = []
+        y_train = []
+
+        for i in range(len(fn)):
+            #index = np.random.choice(fn.shape[0],1)
+            img = cv2.imread('../input/train/{}.jpg'.format(fn[i]))
+            x_train.append(cv2.resize(img,(image_size,image_size)))
+            label = one_hot_labels[i]
+            y_train.append(label)
+        y_train_np = np.array(y_train)
+        x_train_np = np.array(x_train)
+
+
+        del x_train
+        del y_train
+        del fn
+
+
+        y_train_np = np.array_split(y_train_np, num_batches)
+        x_train_np = np.array_split(x_train_np, num_batches)
+#        print(i)
+        while y_train_np:
+            batch_y = y_train_np.pop()
+            batch_x = x_train_np.pop()
+            batch_y = batch_y/1.0
+            batch_x = batch_x/255.0
+            yield batch_x, batch_y
+
+base_model = MobileNet(#weights='imagenet',
     weights = 'imagenet', include_top=False, input_shape=(im_size, im_size, 3))
 
 # Add a new top layer
@@ -77,17 +110,17 @@ callbacks_list = [keras.callbacks.EarlyStopping(monitor='val_acc', patience=3, v
 model.summary()
 
 
-checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/mbnet-weights-improvement-{:02d}.hdf5"
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/vgg19-weights-improvement-{:02d}.hdf5"
 checkpoint = ModelCheckpoint(checkpointpath, verbose=1)
 
-batch_size = 16
+batch_size = 32
+num_batches = 10222//batch_size
 model.fit_generator(data_gen( batch_size=batch_size, image_size = im_size),
-                    steps_per_epoch=32,
+                    steps_per_epoch=num_batches,
                     epochs=10, verbose =1)
-
-
 x_test = []
 
+print("Finished training.")
 
 df_test = pd.read_csv('../input/sample_submission.csv')
 
