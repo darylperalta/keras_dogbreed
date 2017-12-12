@@ -14,7 +14,7 @@ import cv2
 
 
 from random import randint
-im_size = 120
+im_size = 90
 
 num_samples = 10222
 
@@ -55,7 +55,7 @@ def data_gen(batch_size, image_size):
         yield x_train_raw, y_train_raw
 
 base_model = MobileNet(#weights='imagenet',
-    weights = None, include_top=False, input_shape=(im_size, im_size, 3))
+    weights = 'imagenet', include_top=False, input_shape=(im_size, im_size, 3))
 
 # Add a new top layer
 x = base_model.output
