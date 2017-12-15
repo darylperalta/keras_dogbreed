@@ -1,5 +1,5 @@
 #fixing data generator because of OOM error
-#using the entire training data
+#using the 9:1 train-split
 
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
@@ -28,8 +28,8 @@ num_class = 120
 epochs = 90
 batch_size = 32
 
-train_dir = '../input/train'
-validation_dir = '../data_gen/validation'
+train_dir = '../data_gen_9/train'
+validation_dir = '../data_gen_9/validation'
 
 
 train_datagen = ImageDataGenerator(
@@ -95,10 +95,11 @@ model.fit_generator(train_generator,
 #                    epochs=1, validation_data=validation_generator,validation_steps=1, verbose =1)
 
 
-x_test = []
 
 print("Finished training.")
 
+
+x_test = []
 df_test = pd.read_csv('../input/sample_submission.csv')
 df_train = pd.read_csv('../input/labels.csv')
 
@@ -128,4 +129,4 @@ sub.columns = col_names
 # Insert the column id from the sample_submission at the start of the data frame
 sub.insert(0, 'id', df_test['id'])
 #sub.head(10358)
-df_test.to_csv('pred_resnet50_nosplit.csv', index=None)
+df_test.to_csv('pred_resnet50_9split.csv', index=None)

@@ -18,7 +18,7 @@ def mkdirIfNotExist(directory):
         os.mkdir(directory)
     return directory
 
-base_dir = mkdirIfNotExist('./data_gen')
+base_dir = mkdirIfNotExist('../data_gen_9')
 train_dir = mkdirIfNotExist(os.path.join(base_dir, 'train'))
 validation_dir = mkdirIfNotExist(os.path.join(base_dir, 'validation'))
 test_dir = mkdirIfNotExist(os.path.join(base_dir, 'test'))
@@ -38,7 +38,7 @@ def copyIfNotExist(fnames, src_dir, dst_dir):
         print("Copied %d to %s" % (nCopied, dst_dir))
 
 # This will split available labeled data to train-validation sets
-train_ratio = 0.7
+train_ratio = 0.9
 for clazz in clazzes[:]:
     fnames = train_labels[train_labels[:, 1] == clazz][:,0]
     fnames = ['{}.jpg'.format(name) for name in fnames]
