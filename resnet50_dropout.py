@@ -31,6 +31,8 @@ batch_size = 32
 train_dir = '../data_gen_9/train'
 validation_dir = '../data_gen_9/validation'
 
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_dropout/resnet50-weights-improvement-{epoch:02d}.hdf5"
+
 
 train_datagen = ImageDataGenerator(
     rescale=1./255,
@@ -65,13 +67,16 @@ base_model = ResNet50(#weights='imagenet',
 # Add a new top layer
 x = base_model.output
 x = Flatten()(x)
+x = Dropout(0.5)(x)
+x = Dense(1024)(x)
+x = Dropout(0.5)(x)
 predictions = Dense(num_class, activation='softmax')(x)
 
 # This is the model we will train
 model = Model(inputs=base_model.input, outputs=predictions)
 
 # First: train only the top layers (which were randomly initialized)
-frz=len(base_model.layers)-6
+frz=len(base_model.layers)-5
 for layer in base_model.layers[:frz]:
     layer.trainable = False
 
@@ -82,7 +87,6 @@ model.compile(loss='categorical_crossentropy',
 #callbacks_list = [keras.callbacks.EarlyStopping(monitor='val_acc', patience=3, verbose=1)]
 model.summary()
 
-checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_nosplit/resnet50-weights-improvement-{epoch:02d}.hdf5"
 checkpoint = ModelCheckpoint(checkpointpath, verbose=1)
 
 

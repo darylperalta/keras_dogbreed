@@ -6,7 +6,7 @@ import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import keras
 #from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet50 import ResNet50
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.layers import Dense, Dropout, Flatten
 from keras.callbacks import Callback, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
@@ -71,29 +71,25 @@ predictions = Dense(num_class, activation='softmax')(x)
 model = Model(inputs=base_model.input, outputs=predictions)
 
 # First: train only the top layers (which were randomly initialized)
-frz=len(base_model.layers)-6
+frz=len(base_model.layers)
 for layer in base_model.layers[:frz]:
-    layer.trainable = False
+    layer.trainable = True
 
 model.compile(loss='categorical_crossentropy',
               optimizer=RMSprop(lr=0.0009),
               metrics=['accuracy'])
 
 #callbacks_list = [keras.callbacks.EarlyStopping(monitor='val_acc', patience=3, verbose=1)]
+model = load_model('/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_trainable/resnet50-weights-improvement-23.hdf5')
 model.summary()
 
-checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_nosplit/resnet50-weights-improvement-{epoch:02d}.hdf5"
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_trainable/resnet50-weights-improvement-{epoch:02d}.hdf5"
 checkpoint = ModelCheckpoint(checkpointpath, verbose=1)
 
 
 num_batches = num_samples//batch_size
 model.fit_generator(train_generator,
                     steps_per_epoch=num_batches,
-                    epochs=epochs, validation_data=validation_generator,validation_steps=num_batches, verbose =1,callbacks=[checkpoint])
-#model.fit_generator(train_generator,
-#                    steps_per_epoch=5,
-#                    epochs=1, validation_data=validation_generator,validation_steps=1, verbose =1)
-
-
+                    epochs=epochs, validation_data=validation_generator,validation_steps=num_batches, verbose =1, initial_epoch =24, callbacks=[checkpoint])
 
 print("Finished training.")

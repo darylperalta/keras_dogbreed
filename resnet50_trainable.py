@@ -71,9 +71,9 @@ predictions = Dense(num_class, activation='softmax')(x)
 model = Model(inputs=base_model.input, outputs=predictions)
 
 # First: train only the top layers (which were randomly initialized)
-frz=len(base_model.layers)-6
+frz=len(base_model.layers)
 for layer in base_model.layers[:frz]:
-    layer.trainable = False
+    layer.trainable = True
 
 model.compile(loss='categorical_crossentropy',
               optimizer=RMSprop(lr=0.0009),
@@ -82,7 +82,7 @@ model.compile(loss='categorical_crossentropy',
 #callbacks_list = [keras.callbacks.EarlyStopping(monitor='val_acc', patience=3, verbose=1)]
 model.summary()
 
-checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_nosplit/resnet50-weights-improvement-{epoch:02d}.hdf5"
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_trainable/resnet50-weights-improvement-{epoch:02d}.hdf5"
 checkpoint = ModelCheckpoint(checkpointpath, verbose=1)
 
 

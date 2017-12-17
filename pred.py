@@ -16,8 +16,9 @@ im_size =224
 
 x_test = []
 
-checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_nosplit/resnet50-weights-improvement-89.hdf5"
-
+#checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_nosplit/resnet50-weights-improvement-89.hdf5"
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_dropout/resnet50-weights-improvement-89.hdf5"
+pred_filename = "resnet50_dropout.csv"
 #load model
 model = load_model(checkpointpath)
 
@@ -51,4 +52,4 @@ sub.columns = col_names
 # Insert the column id from the sample_submission at the start of the data frame
 sub.insert(0, 'id', df_test['id'])
 #sub.head(10358)
-sub.to_csv('pred_resnet50_9split2.csv', index=None)
+sub.to_csv(pred_filename, index=None)
