@@ -17,11 +17,12 @@ im_size =224
 x_test = []
 
 #checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_nosplit/resnet50-weights-improvement-89.hdf5"
-checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_dropout/resnet50-weights-improvement-89.hdf5"
-pred_filename = "resnet50_dropout.csv"
+#checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/resnet50_dropout/resnet50-weights-improvement-139.hdf5"
+checkpointpath="/media/airscan/Data/AIRSCAN/EE298F/dogbreed/xception_rlr_weights/xception-weights-improvement-89.hdf5"
+pred_filename = "xception_rlr_89e.csv"
+
 #load model
 model = load_model(checkpointpath)
-
 
 df_test = pd.read_csv('../input/sample_submission.csv')
 df_train = pd.read_csv('../input/labels.csv')
